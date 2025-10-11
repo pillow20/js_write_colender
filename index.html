@@ -1,3 +1,6 @@
+Вот **готовый исправленный HTML-код** с непрерывным графиком смен (без сброса на каждый год), основанный на вашем исходном файле и с учётом логики 2 дня работы → 6 дней отдыха для двух бригад (зелёная — дневная, коричневая — ночная), начиная с 3 и 6 января 2025 года соответственно.
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -56,7 +59,6 @@
       margin-bottom: 25px;
     }
 
-    /* Стиль для ссылок-кнопок */
     .btn-link {
       display: flex;
       align-items: center;
@@ -79,7 +81,6 @@
       box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
     }
 
-    /* Оставить третью кнопку как button, если нужно JS-поведение */
     .btn {
       padding: 16px;
       font-size: 1.1rem;
@@ -237,46 +238,36 @@
       font-size: 0.9rem;
     }
 
-    /* Мобильные стили */
     @media (max-width: 768px) {
       body {
         padding: 10px;
       }
-
       .container {
         border-radius: 10px;
       }
-
       header {
         padding: 20px 15px;
       }
-
       header h1 {
         font-size: 1.5rem;
       }
-
       header h2 {
         font-size: 1.1rem;
       }
-
       main {
         padding: 20px 15px;
       }
-
       .btn-link, .btn {
         padding: 14px;
         font-size: 1rem;
       }
-
       .month-title {
         font-size: 1.15rem;
         padding: 8px 12px;
       }
-
       .day-number {
         font-size: 0.9rem;
       }
-
       .day-label {
         font-size: 0.65rem;
       }
@@ -286,25 +277,20 @@
       header h1 {
         font-size: 1.3rem;
       }
-
       header h2 {
         font-size: 1rem;
       }
-
       .calendar {
         gap: 4px;
         padding: 8px;
       }
-
       .day-header {
         font-size: 0.75rem;
         padding: 6px 0;
       }
-
       .day-number {
         font-size: 0.85rem;
       }
-
       .day-label {
         font-size: 0.6rem;
       }
@@ -357,34 +343,40 @@
     let currentYear = today.getFullYear();
     let currentMonth = today.getMonth();
 
+    // === ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ СМЕН (непрерывная) ===
     const highlightedDates = { green: new Set(), brown: new Set() };
 
-    function addHighlightedDatesForYear(year) {
-      const addToSet = (date, set) => {
-        if (date.getFullYear() === year) {
-          set.add(date.toISOString().split('T')[0]);
+    // Начало циклов: 3 января — зелёная (день), 6 января — коричневая (ночь)
+    const greenStart = new Date(2025, 0, 3); // 3 янв 2025
+    const brownStart = new Date(2025, 0, 6); // 6 янв 2025
+
+    function generateShifts() {
+      const endDate = new Date(2031, 0, 1); // генерируем до 1 янв 2031
+
+      function addShifts(startDate, targetSet) {
+        let current = new Date(startDate);
+        while (current < endDate) {
+          // Добавляем два дня подряд
+          const d1 = current.toISOString().split('T')[0];
+          const d2 = new Date(current);
+          d2.setDate(d2.getDate() + 1);
+          const d2str = d2.toISOString().split('T')[0];
+
+          targetSet.add(d1);
+          targetSet.add(d2str);
+
+          // Сдвигаем на 8 дней от первого дня блока
+          current.setDate(current.getDate() + 8);
         }
-      };
-
-      let green = new Date(year, 0, 3);
-      while (green.getFullYear() === year) {
-        addToSet(new Date(green), highlightedDates.green);
-        addToSet(new Date(green.getFullYear(), green.getMonth(), green.getDate() + 1), highlightedDates.green);
-        green.setDate(green.getDate() + 8);
       }
 
-      let brown = new Date(year, 0, 6);
-      while (brown.getFullYear() === year) {
-        addToSet(new Date(brown), highlightedDates.brown);
-        addToSet(new Date(brown.getFullYear(), brown.getMonth(), brown.getDate() + 1), highlightedDates.brown);
-        brown.setDate(brown.getDate() + 8);
-      }
+      addShifts(greenStart, highlightedDates.green);
+      addShifts(brownStart, highlightedDates.brown);
     }
 
-    for (let year = 2025; year <= 2030; year++) {
-      addHighlightedDatesForYear(year);
-    }
+    generateShifts(); // Генерируем один раз при загрузке
 
+    // === ОТОБРАЖЕНИЕ КАЛЕНДАРЯ ===
     function renderCalendar() {
       document.getElementById('monthTitle').textContent = `${monthNames[currentMonth]} ${currentYear} года`;
       
@@ -400,30 +392,33 @@
       
       const firstDay = new Date(currentYear, currentMonth, 1);
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const startDayOfWeek = firstDay.getDay() || 7;
+      const startDayOfWeek = firstDay.getDay() || 7; // Воскресенье = 7
       
+      // Пустые ячейки до 1-го числа
       for (let i = 1; i < startDayOfWeek; i++) {
         const emptyDay = document.createElement('div');
         emptyDay.className = 'day empty';
         calendarEl.appendChild(emptyDay);
       }
       
+      // Дни месяца
       for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateStr = date.toISOString().split('T')[0];
+        const dayOfWeek = date.getDay();
+
         const dayEl = document.createElement('div');
         dayEl.className = 'day';
-        
-        const date = new Date(currentYear, currentMonth, day);
-        const dayOfWeek = date.getDay();
-        const dateStr = date.toISOString().split('T')[0];
         
         const numberEl = document.createElement('div');
         numberEl.className = 'day-number';
         numberEl.textContent = day;
-        
+        dayEl.appendChild(numberEl);
+
         let isHighlighted = false;
         const labelEl = document.createElement('div');
         labelEl.className = 'day-label';
-        
+
         if (highlightedDates.green.has(dateStr)) {
           dayEl.classList.add('highlight-green');
           labelEl.textContent = 'день';
@@ -433,20 +428,19 @@
           labelEl.textContent = 'ночь';
           isHighlighted = true;
         }
-        
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          dayEl.classList.add('weekend');
-        }
-        
-        if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
-          dayEl.classList.add('today');
-        }
-        
-        dayEl.appendChild(numberEl);
+
         if (isHighlighted) {
           dayEl.appendChild(labelEl);
         }
-        
+
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          dayEl.classList.add('weekend');
+        }
+
+        if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
+          dayEl.classList.add('today');
+        }
+
         calendarEl.appendChild(dayEl);
       }
     }
