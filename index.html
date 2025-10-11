@@ -3,61 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Календарь месяца</title>
+  <title>График смен бригады № 2</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Arial', sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
     }
 
     .container {
-      width: 100%;
-      max-width: 400px;
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      padding: 30px 20px;
       text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    header h2 {
+      font-size: 1.3rem;
+      font-weight: normal;
+      opacity: 0.9;
+    }
+
+    main {
+      padding: 30px 20px;
     }
 
     .buttons {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
+    /* Стиль для ссылок-кнопок */
+    .btn-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Оставить третью кнопку как button, если нужно JS-поведение */
     .btn {
       padding: 16px;
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 1.1rem;
+      font-weight: bold;
       color: white;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #3498db, #2980b9);
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .btn:hover,
-    .btn:focus {
+    .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .schedule-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+      margin: 20px 0 25px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #eee;
     }
 
     .calendar-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       padding: 0 10px;
     }
 
@@ -65,9 +119,9 @@
       width: 40px;
       height: 40px;
       background: white;
-      border: 2px solid #667eea;
+      border: 2px solid #3498db;
       border-radius: 50%;
-      color: #667eea;
+      color: #3498db;
       font-size: 18px;
       font-weight: bold;
       cursor: pointer;
@@ -75,43 +129,43 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .nav-button:hover {
-      background: #667eea;
+      background: #3498db;
       color: white;
       transform: scale(1.1);
     }
 
     .month-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #2d3748;
-      background: white;
-      padding: 12px 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #2c3e50;
+      background: #f8f9fa;
+      padding: 10px 16px;
+      border-radius: 10px;
       flex: 1;
-      margin: 0 15px;
+      margin: 0 12px;
+      text-align: center;
     }
 
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      background: white;
-      padding: 15px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      gap: 6px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 12px;
     }
 
     .day-header {
-      font-size: 14px;
-      font-weight: 600;
-      color: #4a5568;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #495057;
       padding: 8px 0;
       text-transform: uppercase;
+      text-align: center;
     }
 
     .day {
@@ -120,78 +174,171 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 12px;
+      font-size: 0.85rem;
       font-weight: 500;
-      color: #2d3748;
+      color: #2c3e50;
       border-radius: 8px;
-      background: #f7fafc;
+      background: white;
       transition: all 0.2s;
       padding: 4px;
     }
 
     .day-number {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: bold;
       margin-bottom: 2px;
     }
 
     .day-label {
-      font-size: 10px;
-      font-weight: 600;
+      font-size: 0.7rem;
+      font-weight: bold;
       text-transform: uppercase;
     }
 
     .day:hover {
-      background: #edf2f7;
+      background: #e9ecef;
       transform: scale(1.05);
     }
 
     .weekend {
-      color: #e53e3e;
-      font-weight: 600;
-      border: 2px solid #feb2b2;
-      background: #fff5f5;
+      color: #e74c3c;
+      font-weight: bold;
+      border: 1px solid #fadbd8;
+      background: #fdf2f2;
     }
 
     .today {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
-      font-weight: 700;
+      font-weight: bold;
     }
 
     .empty {
       background: transparent;
     }
 
-    /* === Выделенные дни: ГОЛУБОЙ и ТЁМНО-КОРИЧНЕВЫЙ === */
     .highlight-green {
       background: linear-gradient(135deg, #4299e1, #2c5282) !important;
       color: white !important;
-      border: 2px solid #2c5282;
+      border: 1px solid #2c5282;
     }
 
     .highlight-brown {
       background: linear-gradient(135deg, #a0522d, #5D2E0F) !important;
       color: white !important;
-      border: 2px solid #5D2E0F;
+      border: 1px solid #5D2E0F;
+    }
+
+    footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    /* Мобильные стили */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        border-radius: 10px;
+      }
+
+      header {
+        padding: 20px 15px;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      header h2 {
+        font-size: 1.1rem;
+      }
+
+      main {
+        padding: 20px 15px;
+      }
+
+      .btn-link, .btn {
+        padding: 14px;
+        font-size: 1rem;
+      }
+
+      .month-title {
+        font-size: 1.15rem;
+        padding: 8px 12px;
+      }
+
+      .day-number {
+        font-size: 0.9rem;
+      }
+
+      .day-label {
+        font-size: 0.65rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.3rem;
+      }
+
+      header h2 {
+        font-size: 1rem;
+      }
+
+      .calendar {
+        gap: 4px;
+        padding: 8px;
+      }
+
+      .day-header {
+        font-size: 0.75rem;
+        padding: 6px 0;
+      }
+
+      .day-number {
+        font-size: 0.85rem;
+      }
+
+      .day-label {
+        font-size: 0.6rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="buttons">
-      <button class="btn">Кнопка 1</button>
-      <button class="btn">Кнопка 2</button>
-      <button class="btn">Кнопка 3</button>
-    </div>
-    
-    <div class="calendar-header">
-      <button class="nav-button" id="prevMonth"><</button>
-      <div class="month-title" id="monthTitle"></div>
-      <button class="nav-button" id="nextMonth">></button>
-    </div>
-    
-    <div class="calendar" id="calendar"></div>
+    <header>
+      <h1>Муринский хлебокомбинат</h1>
+      <h2>бригада номер 2</h2>
+    </header>
+
+    <main>
+      <div class="buttons">
+        <a href="https://pillow20.github.io/salary-calculation/" class="btn-link" target="_blank">Расчет зарплаты</a>
+        <a href="https://pillow20.github.io/Double-Pay/" class="btn-link" target="_blank">Расчет в выходной день</a>
+        <button class="btn">Кнопка 3</button>
+      </div>
+
+      <div class="schedule-title">График смен бригады № 2</div>
+
+      <div class="calendar-header">
+        <button class="nav-button" id="prevMonth"><</button>
+        <div class="month-title" id="monthTitle"></div>
+        <button class="nav-button" id="nextMonth">></button>
+      </div>
+
+      <div class="calendar" id="calendar"></div>
+    </main>
+
+    <footer>
+      <p>© 2025 "Алексей Агафонов" - Расчет зарплаты</p>
+    </footer>
   </div>
 
   <script>
@@ -210,7 +357,6 @@
     let currentYear = today.getFullYear();
     let currentMonth = today.getMonth();
 
-    // Генерация выделенных дат с 2025 по 2030 год
     const highlightedDates = { green: new Set(), brown: new Set() };
 
     function addHighlightedDatesForYear(year) {
@@ -220,7 +366,6 @@
         }
       };
 
-      // "День" — начинается с 3 января, каждые 8 дней по 2 дня
       let green = new Date(year, 0, 3);
       while (green.getFullYear() === year) {
         addToSet(new Date(green), highlightedDates.green);
@@ -228,7 +373,6 @@
         green.setDate(green.getDate() + 8);
       }
 
-      // "Ночь" — начинается с 6 января, каждые 8 дней по 2 дня
       let brown = new Date(year, 0, 6);
       while (brown.getFullYear() === year) {
         addToSet(new Date(brown), highlightedDates.brown);
@@ -237,7 +381,6 @@
       }
     }
 
-    // Генерируем для всех лет с 2025 по 2030 включительно
     for (let year = 2025; year <= 2030; year++) {
       addHighlightedDatesForYear(year);
     }
@@ -248,7 +391,6 @@
       const calendarEl = document.getElementById('calendar');
       calendarEl.innerHTML = '';
       
-      // Дни недели
       dayNames.forEach(dayName => {
         const dayHeader = document.createElement('div');
         dayHeader.className = 'day-header';
@@ -260,14 +402,12 @@
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       const startDayOfWeek = firstDay.getDay() || 7;
       
-      // Пустые дни до начала месяца
       for (let i = 1; i < startDayOfWeek; i++) {
         const emptyDay = document.createElement('div');
         emptyDay.className = 'day empty';
         calendarEl.appendChild(emptyDay);
       }
       
-      // Дни месяца
       for (let day = 1; day <= daysInMonth; day++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'day';
@@ -294,12 +434,10 @@
           isHighlighted = true;
         }
         
-        // Выходные
         if (dayOfWeek === 0 || dayOfWeek === 6) {
           dayEl.classList.add('weekend');
         }
         
-        // Сегодня
         if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
           dayEl.classList.add('today');
         }
