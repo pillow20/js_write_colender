@@ -164,7 +164,8 @@
       background: white;
       transition: all 0.2s;
       padding: 4px;
-      min-width: 0; /* Ключевая строка для адаптивности */
+      min-width: 0;
+      cursor: pointer;
     }
 
     .day-number {
@@ -177,6 +178,14 @@
       font-size: 0.7rem;
       font-weight: bold;
       text-transform: uppercase;
+    }
+
+    .today-marker {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: white;
+      line-height: 1;
+      text-shadow: 0 0 2px rgba(0,0,0,0.4);
     }
 
     .day:hover {
@@ -259,7 +268,6 @@
       .day-label { font-size: 0.6rem; }
     }
 
-    /* Дополнительная защита для очень узких экранов */
     @media (max-width: 375px) {
       .calendar {
         gap: 2px;
@@ -274,6 +282,9 @@
       }
       .day-label {
         font-size: 0.55rem;
+      }
+      .today-marker {
+        font-size: 1rem;
       }
     }
   </style>
@@ -329,6 +340,9 @@
       brown: new Set(),
       afterBrown: new Set()
     };
+
+    // Набор отключённых (скрытых) смен
+    const disabledDates = new Set();
 
     const greenStart = new Date(2025, 0, 3);  // дневная — 3 янв 2025
     const brownStart = new Date(2025, 0, 6);  // ночная — 6 янв 2025
@@ -386,16 +400,18 @@
       let nightHours = 0;
 
       const firstDayStr = new Date(year, month, 1).toISOString().split('T')[0];
-      const isFirstDayAfterBrown = highlightedDates.afterBrown.has(firstDayStr);
+      const isFirstDayAfterBrown = highlightedDates.afterBrown.has(firstDayStr) && !disabledDates.has(firstDayStr);
 
       if (isFirstDayAfterBrown) {
         totalHours += 7;
-        nightHours += 5.5;
+        nightHours += 4.5;
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = new Date(year, month, day).toISOString().split('T')[0];
         const isLastDay = day === daysInMonth;
+
+        if (disabledDates.has(dateStr)) continue;
 
         if (highlightedDates.brown.has(dateStr)) {
           shiftCount++;
@@ -454,27 +470,58 @@
         const labelEl = document.createElement('div');
         labelEl.className = 'day-label';
 
+        // Определяем тип смены и сохраняем в dataset
         if (highlightedDates.afterBrown.has(dateStr)) {
-          dayEl.classList.add('highlight-after-brown');
-          labelEl.textContent = 'с ночи';
+          dayEl.dataset.shiftType = 'afterBrown';
         } else if (highlightedDates.brown.has(dateStr)) {
-          dayEl.classList.add('highlight-brown');
-          labelEl.textContent = 'ночь';
+          dayEl.dataset.shiftType = 'brown';
         } else if (highlightedDates.green.has(dateStr)) {
-          dayEl.classList.add('highlight-green');
-          labelEl.textContent = 'день';
+          dayEl.dataset.shiftType = 'green';
+        } else {
+          dayEl.dataset.shiftType = 'none';
+        }
+
+        // Отображаем смену, только если она не отключена
+        if (!disabledDates.has(dateStr)) {
+          if (highlightedDates.afterBrown.has(dateStr)) {
+            dayEl.classList.add('highlight-after-brown');
+            labelEl.textContent = 'с ночи';
+          } else if (highlightedDates.brown.has(dateStr)) {
+            dayEl.classList.add('highlight-brown');
+            labelEl.textContent = 'ночь';
+          } else if (highlightedDates.green.has(dateStr)) {
+            dayEl.classList.add('highlight-green');
+            labelEl.textContent = 'день';
+          }
         }
 
         if (labelEl.textContent) {
           dayEl.appendChild(labelEl);
         }
 
+        // Маркер сегодняшнего дня — только если это сегодня
+        if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
+          const todayMarker = document.createElement('div');
+          todayMarker.className = 'today-marker';
+          todayMarker.textContent = '✓';
+          dayEl.appendChild(todayMarker);
+          dayEl.classList.add('today');
+        }
+
         if (dayOfWeek === 0 || dayOfWeek === 6) {
           dayEl.classList.add('weekend');
         }
 
-        if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
-          dayEl.classList.add('today');
+        // Добавляем обработчик клика только для ячеек со сменой
+        if (dayEl.dataset.shiftType !== 'none') {
+          dayEl.addEventListener('click', () => {
+            if (disabledDates.has(dateStr)) {
+              disabledDates.delete(dateStr);
+            } else {
+              disabledDates.add(dateStr);
+            }
+            renderCalendar();
+          });
         }
 
         calendarEl.appendChild(dayEl);
