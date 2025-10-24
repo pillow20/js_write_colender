@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <title>График смен бригады № 2</title>
   <style>
     * {
@@ -238,6 +239,112 @@
       color: #2c3e50;
     }
 
+    /* === Калькулятор зарплаты === */
+    .calculator-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .calculator-section h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #34495e;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .btn-calculate {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-calculate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-reset {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: #d0d0d0;
+    }
+
+    #result {
+      margin-top: 25px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: none;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .result-label {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .result-value {
+      color: #3498db;
+    }
+
+    .total-amount {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #27ae60;
+      text-align: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px solid #eee;
+    }
+
     footer {
       background: #2c3e50;
       color: white;
@@ -312,6 +419,34 @@
 
       <div class="calendar" id="calendar"></div>
       <div id="summary"></div>
+
+      <!-- Встроенный калькулятор зарплаты -->
+      <div class="calculator-section">
+        <h3>Калькулятор зарплаты</h3>
+        <form id="salaryForm">
+          <div class="form-group">
+            <label for="oklad">Оклад (руб.):</label>
+            <input type="number" id="oklad" value="48910" step="10" min="0">
+          </div>
+          <div class="form-group">
+            <label for="hours">Отработанные часы:</label>
+            <input type="number" id="hours" step="0.01" min="0" readonly>
+          </div>
+          <div class="form-group">
+            <label for="nightHours">Ночные часы:</label>
+            <input type="number" id="nightHours" step="0.01" min="0" readonly>
+          </div>
+          <div class="form-group">
+            <label for="premium">Премия за месяц (%):</label>
+            <input type="number" id="premium" value="40" step="1" min="0" max="200">
+          </div>
+          <button type="button" class="btn-calculate" onclick="calculateSalary()">Рассчитать зарплату</button>
+        </form>
+        <div id="result">
+          <div id="resultContent"></div>
+          <button type="button" class="btn-reset" onclick="resetForm()">Новый расчёт</button>
+        </div>
+      </div>
     </main>
 
     <footer>
@@ -341,7 +476,6 @@
       afterBrown: new Set()
     };
 
-    // Набор отключённых (скрытых) смен
     const disabledDates = new Set();
 
     const greenStart = new Date(2025, 0, 3);  // дневная — 3 янв 2025
@@ -470,7 +604,6 @@
         const labelEl = document.createElement('div');
         labelEl.className = 'day-label';
 
-        // Определяем тип смены и сохраняем в dataset
         if (highlightedDates.afterBrown.has(dateStr)) {
           dayEl.dataset.shiftType = 'afterBrown';
         } else if (highlightedDates.brown.has(dateStr)) {
@@ -481,7 +614,6 @@
           dayEl.dataset.shiftType = 'none';
         }
 
-        // Отображаем смену, только если она не отключена
         if (!disabledDates.has(dateStr)) {
           if (highlightedDates.afterBrown.has(dateStr)) {
             dayEl.classList.add('highlight-after-brown');
@@ -499,7 +631,6 @@
           dayEl.appendChild(labelEl);
         }
 
-        // Маркер сегодняшнего дня — только если это сегодня
         if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
           const todayMarker = document.createElement('div');
           todayMarker.className = 'today-marker';
@@ -512,7 +643,6 @@
           dayEl.classList.add('weekend');
         }
 
-        // Добавляем обработчик клика только для ячеек со сменой
         if (dayEl.dataset.shiftType !== 'none') {
           dayEl.addEventListener('click', () => {
             if (disabledDates.has(dateStr)) {
@@ -534,6 +664,10 @@
       
       document.getElementById('summary').textContent = 
         `Смен: ${stats.shiftCount} | Часов: ${stats.totalHours} | Ночных: ${formattedNight}`;
+
+      // Обновляем поля калькулятора
+      document.getElementById('hours').value = stats.totalHours.toFixed(2);
+      document.getElementById('nightHours').value = stats.nightHours.toFixed(2);
     }
 
     document.getElementById('btnSalary').addEventListener('click', () => {
@@ -569,7 +703,120 @@
       }
       renderCalendar();
     });
-    
+
+    // === Калькулятор зарплаты ===
+    function calculateSalary() {
+        const oklad = parseFloat(document.getElementById('oklad').value);
+        const hours = parseFloat(document.getElementById('hours').value);
+        const nightHours = parseFloat(document.getElementById('nightHours').value);
+        const premiumPercent = parseFloat(document.getElementById('premium').value);
+
+        if (isNaN(oklad) || isNaN(hours) || isNaN(nightHours) || isNaN(premiumPercent)) {
+            alert("Пожалуйста, заполните все поля корректно.");
+            return;
+        }
+
+        const BASE_HOURS = 164.3333;
+        const NIGHT_RATE = 0.4;
+        const HARM_RATE = 0.04;
+        const NDFL_RATE = 0.13;
+
+        const baseRate = oklad / BASE_HOURS;
+        const basePay = baseRate * hours;
+        const premiumPay = basePay * (premiumPercent / 100);
+        const nightPay = baseRate * nightHours * NIGHT_RATE;
+        const totalBeforeHarm = basePay + premiumPay + nightPay;
+        const harmAddition = totalBeforeHarm * HARM_RATE;
+        const totalWithHarm = totalBeforeHarm + harmAddition;
+        const ndfl = totalWithHarm * NDFL_RATE;
+        const finalSalary = totalWithHarm - ndfl;
+
+        displayResults({
+            oklad,
+            hours,
+            nightHours,
+            premiumPercent,
+            baseRate,
+            basePay,
+            premiumPay,
+            nightPay,
+            totalBeforeHarm,
+            harmAddition,
+            totalWithHarm,
+            ndfl,
+            finalSalary
+        });
+    }
+
+    function displayResults(data) {
+        const resultContent = document.getElementById('resultContent');
+        resultContent.innerHTML = `
+            <div class="result-item">
+                <span class="result-label">Оклад:</span>
+                <span class="result-value">${data.oklad.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Отработано часов:</span>
+                <span class="result-value">${data.hours.toFixed(2)} ч</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Ночные часы:</span>
+                <span class="result-value">${data.nightHours.toFixed(2)} ч</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Премия:</span>
+                <span class="result-value">${data.premiumPercent.toFixed(1)}%</span>
+            </div>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #dee2e6;">
+            <div class="result-item">
+                <span class="result-label">Ставка за час:</span>
+                <span class="result-value">${data.baseRate.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">1. Основная оплата:</span>
+                <span class="result-value">${data.basePay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">2. Премия:</span>
+                <span class="result-value">${data.premiumPay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">3. Доплата за ночные часы:</span>
+                <span class="result-value">${data.nightPay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">4. Итого до вредности:</span>
+                <span class="result-value">${data.totalBeforeHarm.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">5. Доплата за вредность (4%):</span>
+                <span class="result-value">${data.harmAddition.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">6. Итого до НДФЛ:</span>
+                <span class="result-value">${data.totalWithHarm.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">7. НДФЛ (13%):</span>
+                <span class="result-value" style="color: #e74c3c;">-${data.ndfl.toFixed(2)} руб.</span>
+            </div>
+            <div class="total-amount">
+                К ВЫПЛАТЕ: ${data.finalSalary.toFixed(2)} руб.
+            </div>
+        `;
+        document.getElementById('result').style.display = 'block';
+    }
+
+    function resetForm() {
+        document.getElementById('oklad').value = '48910';
+        document.getElementById('premium').value = '40';
+        document.getElementById('result').style.display = 'none';
+        // Обновляем часы из календаря
+        const stats = getMonthStats(currentYear, currentMonth);
+        document.getElementById('hours').value = stats.totalHours.toFixed(2);
+        document.getElementById('nightHours').value = stats.nightHours.toFixed(2);
+    }
+
     renderCalendar();
   </script>
 </body>
