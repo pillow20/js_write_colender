@@ -345,13 +345,15 @@
       border-top: 2px solid #eee;
     }
 
-    /* Стиль для подсказки */
+    /* Стиль для подсказки — с отступами сверху и снизу */
     .instruction-text {
       text-align: center;
-      margin-bottom: 15px;
+      margin-top: 25px;
+      margin-bottom: 20px;
       color: #2c3e50;
       font-weight: bold;
       font-size: 0.95rem;
+      line-height: 1.4;
     }
 
     footer {
@@ -429,7 +431,7 @@
       <div class="calendar" id="calendar"></div>
       <div id="summary"></div>
 
-      <!-- Подсказка над калькулятором -->
+      <!-- Подсказка с отступами -->
       <p class="instruction-text">
         Если вас не было на какой-то смене — нажмите на неё, и она исчезнет из расчётов.
       </p>
@@ -469,6 +471,7 @@
   </div>
 
   <script>
+    // ... (весь JS-код без изменений — он остаётся прежним)
     const monthNames = [
       'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
       'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
@@ -718,7 +721,6 @@
       renderCalendar();
     });
 
-    // === Калькулятор зарплаты ===
     function calculateSalary() {
         const oklad = parseFloat(document.getElementById('oklad').value);
         const hours = parseFloat(document.getElementById('hours').value);
@@ -825,7 +827,6 @@
         document.getElementById('oklad').value = '48910';
         document.getElementById('premium').value = '40';
         document.getElementById('result').style.display = 'none';
-        // Обновляем часы из календаря
         const stats = getMonthStats(currentYear, currentMonth);
         document.getElementById('hours').value = stats.totalHours.toFixed(2);
         document.getElementById('nightHours').value = stats.nightHours.toFixed(2);
