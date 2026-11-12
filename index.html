@@ -1,0 +1,879 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>График смен бригады № 2</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    header h2 {
+      font-size: 1.3rem;
+      font-weight: normal;
+      opacity: 0.9;
+    }
+
+    main {
+      padding: 30px 20px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .schedule-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+      margin: 20px 0 25px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+    .nav-button {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 2px solid #3498db;
+      border-radius: 50%;
+      color: #3498db;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button:hover {
+      background: #3498db;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .month-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #2c3e50;
+      background: #f8f9fa;
+      padding: 10px 16px;
+      border-radius: 10px;
+      flex: 1;
+      margin: 0 12px;
+      text-align: center;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 12px;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .day-header {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #495057;
+      padding: 8px 0;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2c3e50;
+      border-radius: 8px;
+      background: white;
+      transition: all 0.2s;
+      padding: 4px;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .day-number {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .day-label {
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .today-marker {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: white;
+      line-height: 1;
+      text-shadow: 0 0 2px rgba(0,0,0,0.4);
+    }
+
+    .day:hover {
+      background: #e9ecef;
+      transform: scale(1.05);
+    }
+
+    .weekend {
+      color: #e74c3c;
+      font-weight: bold;
+      border: 1px solid #fadbd8;
+      background: #fdf2f2;
+    }
+
+    .today {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-weight: bold;
+    }
+
+    .empty {
+      background: transparent;
+    }
+
+    .highlight-green {
+      background: linear-gradient(135deg, #4299e1, #2c5282) !important;
+      color: white !important;
+      border: 1px solid #2c5282;
+    }
+
+    .highlight-brown {
+      background: linear-gradient(135deg, #a0522d, #5D2E0F) !important;
+      color: white !important;
+      border: 1px solid #5D2E0F;
+    }
+
+    .highlight-after-brown {
+      background: linear-gradient(135deg, #d2a679, #b08a5a) !important;
+      color: #5D2E0F !important;
+      border: 1px solid #b08a5a;
+    }
+
+    #summary {
+      margin-top: 20px;
+      text-align: center;
+      padding: 12px;
+      background: #f1f8ff;
+      border-radius: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    /* === Калькулятор зарплаты === */
+    .calculator-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .calculator-section h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #34495e;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .btn-calculate {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-calculate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-reset {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: #d0d0d0;
+    }
+
+    #result {
+      margin-top: 25px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: none;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .result-label {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .result-value {
+      color: #3498db;
+    }
+
+    .total-amount {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #27ae60;
+      text-align: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px solid #eee;
+    }
+
+    /* Стиль для подсказки — с отступами сверху и снизу */
+    .instruction-text {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      font-weight: bold;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { border-radius: 10px; }
+      header { padding: 20px 15px; }
+      header h1 { font-size: 1.5rem; }
+      header h2 { font-size: 1.1rem; }
+      main { padding: 20px 15px; }
+      .btn { padding: 14px; font-size: 1rem; }
+      .month-title { font-size: 1.15rem; padding: 8px 12px; }
+      .day-number { font-size: 0.9rem; }
+      .day-label { font-size: 0.65rem; }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.3rem; }
+      header h2 { font-size: 1rem; }
+      .calendar { gap: 4px; padding: 8px; }
+      .day-header { font-size: 0.75rem; padding: 6px 0; }
+      .day-number { font-size: 0.85rem; }
+      .day-label { font-size: 0.6rem; }
+    }
+
+    @media (max-width: 375px) {
+      .calendar {
+        gap: 2px;
+        padding: 6px;
+      }
+      .day {
+        padding: 2px;
+        font-size: 0.75rem;
+      }
+      .day-number {
+        font-size: 0.8rem;
+      }
+      .day-label {
+        font-size: 0.55rem;
+      }
+      .today-marker {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Муринский хлебокомбинат</h1>
+      <h2>бригада номер 2</h2>
+    </header>
+
+    <main>
+      <div class="buttons">
+        <button class="btn" id="btnSalary">Расчет зарплаты</button>
+        <button class="btn" id="btnDoublePay">Расчет в выходной день</button>
+      </div>
+
+      <div class="schedule-title">График смен бригады № 2</div>
+
+      <div class="calendar-header">
+        <button class="nav-button" id="prevMonth"><</button>
+        <div class="month-title" id="monthTitle"></div>
+        <button class="nav-button" id="nextMonth">></button>
+      </div>
+
+      <div class="calendar" id="calendar"></div>
+      <div id="summary"></div>
+
+      <!-- Подсказка с отступами -->
+      <p class="instruction-text">
+        Если вас не было на какой-то смене — нажмите на неё, и она исчезнет из расчётов.
+      </p>
+
+      <!-- Встроенный калькулятор зарплаты -->
+      <div class="calculator-section">
+        <h3>Калькулятор зарплаты</h3>
+        <form id="salaryForm">
+          <div class="form-group">
+            <label for="oklad">Оклад (руб.):</label>
+            <input type="number" id="oklad" value="48910" step="10" min="0">
+          </div>
+          <div class="form-group">
+            <label for="hours">Отработанные часы:</label>
+            <input type="number" id="hours" step="0.01" min="0" readonly>
+          </div>
+          <div class="form-group">
+            <label for="nightHours">Ночные часы:</label>
+            <input type="number" id="nightHours" step="0.01" min="0" readonly>
+          </div>
+          <div class="form-group">
+            <label for="premium">Премия за месяц (%):</label>
+            <input type="number" id="premium" value="40" step="1" min="0" max="200">
+          </div>
+          <button type="button" class="btn-calculate" onclick="calculateSalary()">Рассчитать зарплату</button>
+        </form>
+        <div id="result">
+          <div id="resultContent"></div>
+          <button type="button" class="btn-reset" onclick="resetForm()">Новый расчёт</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 "Алексей Агафонов" - Расчет зарплаты</p>
+    </footer>
+  </div>
+
+  <script>
+    // ... (весь JS-код без изменений — он остаётся прежним)
+    const monthNames = [
+      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+    ];
+    
+    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+    
+    let currentYear = today.getFullYear();
+    let currentMonth = today.getMonth();
+
+    const highlightedDates = {
+      green: new Set(),
+      brown: new Set(),
+      afterBrown: new Set()
+    };
+
+    const disabledDates = new Set();
+
+    const greenStart = new Date(2025, 0, 3);  // дневная — 3 янв 2025
+    const brownStart = new Date(2025, 0, 6);  // ночная — 6 янв 2025
+
+    // Нормы одной смены. Ночная смена 20:00–08:00: 12 часов минус 1 час перерыва = 11 оплачиваемых.
+    // Ночные часы (22:00–06:00): 8 часов минус 0.5 часа перерыва = 7.5 ночных.
+    // При разбиении на месяцы важно сохранять ПОЛНУЮ норму смены:
+    //   до полуночи: 4 ч всего, 2 ч ночных;
+    //   после полуночи: 7 ч всего, 5.5 ч ночных (а не 4.5, как было раньше).
+    // 4 + 7 = 11, 2 + 5.5 = 7.5 — ни один час не теряется и не задваивается.
+    const DAY_SHIFT_HOURS = 11;
+    const NIGHT_SHIFT_HOURS = 11;
+    const NIGHT_SHIFT_NIGHT_HOURS = 7.5;
+    const NIGHT_BEFORE_MIDNIGHT_HOURS = 4;
+    const NIGHT_BEFORE_MIDNIGHT_NIGHT_HOURS = 2;
+    const NIGHT_AFTER_MIDNIGHT_HOURS = NIGHT_SHIFT_HOURS - NIGHT_BEFORE_MIDNIGHT_HOURS;          // 7
+    const NIGHT_AFTER_MIDNIGHT_NIGHT_HOURS = NIGHT_SHIFT_NIGHT_HOURS - NIGHT_BEFORE_MIDNIGHT_NIGHT_HOURS; // 5.5
+
+    // Реестры конкретных смен. График (множества highlightedDates) остаётся тем же,
+    // но для расчёта месяцев каждая смена хранится как интервал [начало, окончание).
+    const dayShifts = [];
+    const nightShifts = [];
+
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    function dateKey(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function generateShifts() {
+      const endDate = new Date(2031, 0, 1);
+
+      function addDayShifts(startDate, shiftSet) {
+        let current = new Date(startDate);
+        while (current < endDate) {
+          const d1 = new Date(current);
+          const d2 = addDays(current, 1);
+          shiftSet.add(dateKey(d1));
+          shiftSet.add(dateKey(d2));
+          dayShifts.push({ start: d1 });
+          dayShifts.push({ start: d2 });
+          current = addDays(current, 8);
+        }
+      }
+
+      function addNightShiftsAndAfter(startDate, shiftSet, afterSet) {
+        let current = new Date(startDate);
+        while (current < endDate) {
+          const day1 = new Date(current);
+          const day2 = addDays(day1, 1);
+          const after = addDays(day2, 1);
+
+          shiftSet.add(dateKey(day1));
+          shiftSet.add(dateKey(day2));
+          if (after < endDate) {
+            afterSet.add(dateKey(after));
+          }
+
+          // Каждая из двух ночей — отдельная смена, переходящая на следующие сутки.
+          nightShifts.push({ start: day1, end: addDays(day1, 1) });
+          nightShifts.push({ start: day2, end: addDays(day2, 1) });
+
+          current = addDays(current, 8);
+        }
+      }
+
+      addDayShifts(greenStart, highlightedDates.green);
+      addNightShiftsAndAfter(brownStart, highlightedDates.brown, highlightedDates.afterBrown);
+    }
+
+    generateShifts();
+
+    function getMonthStats(year, month) {
+      const monthStart = new Date(year, month, 1);
+      const monthEnd = new Date(year, month + 1, 1);
+      let shiftCount = 0;
+      let totalHours = 0;
+      let nightHours = 0;
+
+      // Дневные смены не переходят через полночь: целиком относятся к месяцу начала.
+      for (const shift of dayShifts) {
+        if (shift.start >= monthStart && shift.start < monthEnd && !disabledDates.has(dateKey(shift.start))) {
+          shiftCount++;
+          totalHours += DAY_SHIFT_HOURS;
+        }
+      }
+
+      // Ночные смены режем по границе месяца (полуночь 1-го числа).
+      // Смена считается в месяце её НАЧАЛА, а часы делятся:
+      //   4 ч (2 ночных) — в месяце начала,
+      //   7 ч (5.5 ночных) — в месяце окончания.
+      // Так корректно работают и переход через год, и случай, когда 1-е число
+      // само является ночной сменой (хвост предыдущей ночи больше не теряется).
+      for (const shift of nightShifts) {
+        const startKey = dateKey(shift.start);
+        const endKey = dateKey(shift.end);
+        const startDisabled = disabledDates.has(startKey);
+        const endDisabled = disabledDates.has(endKey);
+        const startsInMonth = shift.start >= monthStart && shift.start < monthEnd;
+        const endsInMonth = shift.end >= monthStart && shift.end < monthEnd;
+        const crossesMonth = shift.start.getMonth() !== shift.end.getMonth() ||
+                             shift.start.getFullYear() !== shift.end.getFullYear();
+
+        if (startsInMonth && !startDisabled) {
+          shiftCount++;
+          totalHours += NIGHT_BEFORE_MIDNIGHT_HOURS;
+          nightHours += NIGHT_BEFORE_MIDNIGHT_NIGHT_HOURS;
+        }
+
+        if (endsInMonth && !startDisabled) {
+          // Если хвост пришёл из предыдущего месяца, его можно убрать кликом по дню «с ночи».
+          // Но если день окончания сам является началом следующей ночной смены,
+          // отключение этой следующей смены не должно удалять хвост предыдущей.
+          const tailDisabledByAfterDay = crossesMonth && endDisabled && highlightedDates.afterBrown.has(endKey);
+          if (!tailDisabledByAfterDay) {
+            totalHours += NIGHT_AFTER_MIDNIGHT_HOURS;
+            nightHours += NIGHT_AFTER_MIDNIGHT_NIGHT_HOURS;
+          }
+        }
+      }
+
+      return { shiftCount, totalHours, nightHours };
+    }
+
+    function renderCalendar() {
+      document.getElementById('monthTitle').textContent = `${monthNames[currentMonth]} ${currentYear} года`;
+      
+      const calendarEl = document.getElementById('calendar');
+      calendarEl.innerHTML = '';
+      
+      dayNames.forEach(dayName => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'day-header';
+        dayHeader.textContent = dayName;
+        calendarEl.appendChild(dayHeader);
+      });
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const startDayOfWeek = firstDay.getDay() || 7;
+
+      for (let i = 1; i < startDayOfWeek; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'day empty';
+        calendarEl.appendChild(emptyDay);
+      }
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateStr = date.toISOString().split('T')[0];
+        const dayOfWeek = date.getDay();
+
+        const dayEl = document.createElement('div');
+        dayEl.className = 'day';
+        
+        const numberEl = document.createElement('div');
+        numberEl.className = 'day-number';
+        numberEl.textContent = day;
+        dayEl.appendChild(numberEl);
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'day-label';
+
+        if (highlightedDates.afterBrown.has(dateStr)) {
+          dayEl.dataset.shiftType = 'afterBrown';
+        } else if (highlightedDates.brown.has(dateStr)) {
+          dayEl.dataset.shiftType = 'brown';
+        } else if (highlightedDates.green.has(dateStr)) {
+          dayEl.dataset.shiftType = 'green';
+        } else {
+          dayEl.dataset.shiftType = 'none';
+        }
+
+        if (!disabledDates.has(dateStr)) {
+          if (highlightedDates.afterBrown.has(dateStr)) {
+            dayEl.classList.add('highlight-after-brown');
+            labelEl.textContent = 'с ночи';
+          } else if (highlightedDates.brown.has(dateStr)) {
+            dayEl.classList.add('highlight-brown');
+            labelEl.textContent = 'ночь';
+          } else if (highlightedDates.green.has(dateStr)) {
+            dayEl.classList.add('highlight-green');
+            labelEl.textContent = 'день';
+          }
+        }
+
+        if (labelEl.textContent) {
+          dayEl.appendChild(labelEl);
+        }
+
+        if (day === todayDate && currentMonth === todayMonth && currentYear === todayYear) {
+          const todayMarker = document.createElement('div');
+          todayMarker.className = 'today-marker';
+          todayMarker.textContent = '✓';
+          dayEl.appendChild(todayMarker);
+          dayEl.classList.add('today');
+        }
+
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          dayEl.classList.add('weekend');
+        }
+
+        if (dayEl.dataset.shiftType !== 'none') {
+          dayEl.addEventListener('click', () => {
+            if (disabledDates.has(dateStr)) {
+              disabledDates.delete(dateStr);
+            } else {
+              disabledDates.add(dateStr);
+            }
+            renderCalendar();
+          });
+        }
+
+        calendarEl.appendChild(dayEl);
+      }
+
+      const stats = getMonthStats(currentYear, currentMonth);
+      const formattedNight = stats.nightHours % 1 === 0 
+        ? stats.nightHours.toFixed(0) 
+        : stats.nightHours.toFixed(1);
+      
+      document.getElementById('summary').textContent = 
+        `Смен: ${stats.shiftCount} | Часов: ${stats.totalHours} | Ночных: ${formattedNight}`;
+
+      // Обновляем поля калькулятора
+      document.getElementById('hours').value = stats.totalHours.toFixed(2);
+      document.getElementById('nightHours').value = stats.nightHours.toFixed(2);
+    }
+
+    document.getElementById('btnSalary').addEventListener('click', () => {
+      const stats = getMonthStats(currentYear, currentMonth);
+      const url = new URL('https://pillow20.github.io/salary-calculation/');
+      url.searchParams.set('hours', stats.totalHours);
+      url.searchParams.set('night', stats.nightHours);
+      window.open(url, '_blank');
+    });
+
+    document.getElementById('btnDoublePay').addEventListener('click', () => {
+      const stats = getMonthStats(currentYear, currentMonth);
+      const url = new URL('https://pillow20.github.io/Double-Pay/');
+      url.searchParams.set('hours', stats.totalHours);
+      url.searchParams.set('night', stats.nightHours);
+      window.open(url, '_blank');
+    });
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+    
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+
+    function calculateSalary() {
+        const oklad = parseFloat(document.getElementById('oklad').value);
+        const hours = parseFloat(document.getElementById('hours').value);
+        const nightHours = parseFloat(document.getElementById('nightHours').value);
+        const premiumPercent = parseFloat(document.getElementById('premium').value);
+
+        if (isNaN(oklad) || isNaN(hours) || isNaN(nightHours) || isNaN(premiumPercent)) {
+            alert("Пожалуйста, заполните все поля корректно.");
+            return;
+        }
+
+        const BASE_HOURS = 164.3333;
+        const NIGHT_RATE = 0.4;
+        const HARM_RATE = 0.04;
+        const NDFL_RATE = 0.13;
+
+        const baseRate = oklad / BASE_HOURS;
+        const basePay = baseRate * hours;
+        const premiumPay = basePay * (premiumPercent / 100);
+        const nightPay = baseRate * nightHours * NIGHT_RATE;
+        const totalBeforeHarm = basePay + premiumPay + nightPay;
+        const harmAddition = totalBeforeHarm * HARM_RATE;
+        const totalWithHarm = totalBeforeHarm + harmAddition;
+        const ndfl = totalWithHarm * NDFL_RATE;
+        const finalSalary = totalWithHarm - ndfl;
+
+        displayResults({
+            oklad,
+            hours,
+            nightHours,
+            premiumPercent,
+            baseRate,
+            basePay,
+            premiumPay,
+            nightPay,
+            totalBeforeHarm,
+            harmAddition,
+            totalWithHarm,
+            ndfl,
+            finalSalary
+        });
+    }
+
+    function displayResults(data) {
+        const resultContent = document.getElementById('resultContent');
+        resultContent.innerHTML = `
+            <div class="result-item">
+                <span class="result-label">Оклад:</span>
+                <span class="result-value">${data.oklad.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Отработано часов:</span>
+                <span class="result-value">${data.hours.toFixed(2)} ч</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Ночные часы:</span>
+                <span class="result-value">${data.nightHours.toFixed(2)} ч</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Премия:</span>
+                <span class="result-value">${data.premiumPercent.toFixed(1)}%</span>
+            </div>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #dee2e6;">
+            <div class="result-item">
+                <span class="result-label">Ставка за час:</span>
+                <span class="result-value">${data.baseRate.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">1. Основная оплата:</span>
+                <span class="result-value">${data.basePay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">2. Премия:</span>
+                <span class="result-value">${data.premiumPay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">3. Доплата за ночные часы:</span>
+                <span class="result-value">${data.nightPay.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">4. Итого до вредности:</span>
+                <span class="result-value">${data.totalBeforeHarm.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">5. Доплата за вредность (4%):</span>
+                <span class="result-value">${data.harmAddition.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">6. Итого до НДФЛ:</span>
+                <span class="result-value">${data.totalWithHarm.toFixed(2)} руб.</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">7. НДФЛ (13%):</span>
+                <span class="result-value" style="color: #e74c3c;">-${data.ndfl.toFixed(2)} руб.</span>
+            </div>
+            <div class="total-amount">
+                К ВЫПЛАТЕ: ${data.finalSalary.toFixed(2)} руб.
+            </div>
+        `;
+        document.getElementById('result').style.display = 'block';
+    }
+
+    function resetForm() {
+        document.getElementById('oklad').value = '48910';
+        document.getElementById('premium').value = '40';
+        document.getElementById('result').style.display = 'none';
+        const stats = getMonthStats(currentYear, currentMonth);
+        document.getElementById('hours').value = stats.totalHours.toFixed(2);
+        document.getElementById('nightHours').value = stats.nightHours.toFixed(2);
+    }
+
+    renderCalendar();
+  </script>
+</body>
+</html>
